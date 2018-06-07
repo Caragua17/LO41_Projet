@@ -5,7 +5,7 @@
 GLOBAL VARIABLES USED HERE
 */
 int msqid;
-int shmid;
+int shmDL;
 int *dwellerList;
 
 /*=============================================================================
@@ -16,14 +16,14 @@ void traitantSIGINT(int num){
 
 	if(num == SIGINT){
 		shmdt(dwellerList);
-		shmctl(shmid, IPC_RMID, NULL);
+		shmctl(shmDL, IPC_RMID, NULL);
 		msgctl(msqid, IPC_RMID, NULL);
 		printf("\n: Objets IPC supprimés !\n\n");
 		exit(0);
 	}
 }
 /*=============================================================================
-traitantSIGUSR1: executed when a 'SIGUSR1' signal is intercepted.
+traitantSIGUSR: executed when a 'SIGUSR1/SIGUSR2' signal is intercepted.
 Send by a dweller just after his registration, to print the updated list.
 */
 void traitantSIGUSR(int num){
@@ -73,14 +73,14 @@ int main(int argc, char* argv[]){
 	*------------------------------------------------------------------------*/
 	printf("\n: Creation de la Mémoire partagée...\n");
 	
-	if((shmid = shmget(KEY, 3*DWELLERS*sizeof(int),\
+	if((shmDL = shmget(KEY_DL, 3*DWELLERS*sizeof(int),\
 		IPC_CREAT|IPC_EXCL|0755)) == -1){
 			perror("\033[1m\033[31m: Echec.\033[0m\n\n");
 			exit(1);
 	}
 	else{
-		printf(": shm ID = %d\n", shmid);
-		dwellerList = (int*)shmat(shmid, NULL, 0);
+		printf(": shm ID = %d\n", shmDL);
+		dwellerList = (int*)shmat(shmDL, NULL, 0);
 		shm_init(dwellerList, 3*DWELLERS);
 	}
 	shm_write(dwellerList,0,0,getpid());
@@ -94,7 +94,7 @@ int main(int argc, char* argv[]){
 	*------------------------------------------------------------------------*/
 	printf("\n: Creation de la file de message...\n");
 	
-	if((msqid = msgget(KEY, IPC_CREAT|IPC_EXCL|0755)) == -1){
+	if((msqid = msgget(KEY_VR, IPC_CREAT|IPC_EXCL|0755)) == -1){
 		perror("\033[1m\033[31m: Echec.\033[0m\n\n");
 		exit(1);
 	}
@@ -106,14 +106,5 @@ int main(int argc, char* argv[]){
 	*------------------------------------------------------------------------*/
 	while(1);	
 	
-	/*-------------------------------------------------------------------------
-	*	Suppression des objets IPC shm & msq
-	*------------------------------------------------------------------------*/
-	
-	shmdt(dwellerList);
-	shmctl(shmid, IPC_RMID, NULL);
-	msgctl(msqid, IPC_RMID, NULL);
-	printf("\n: Objets IPC supprimés !\n\n");
-
 	return EXIT_SUCCESS;
 }

@@ -49,7 +49,7 @@ int main(int argc, char* argv[]){
 	*------------------------------------------------------------------------*/
 	int shmid;
 	
-	if((shmid = shmget(KEY, 3*DWELLERS*sizeof(int), 0755)) == -1){
+	if((shmid = shmget(KEY_DL, 3*DWELLERS*sizeof(int), 0755)) == -1){
 		printf("\033[1m\033[31m: Echec de connexion.\033[0m\n\n");
 		exit(1);
 	}
@@ -77,7 +77,7 @@ int main(int argc, char* argv[]){
 	*------------------------------------------------------------------------*/
 	int msqid;
 		
-	if((msqid = msgget(KEY, IPC_EXCL|0755)) == -1){
+	if((msqid = msgget(KEY_VR, IPC_EXCL|0755)) == -1){
 		printf("\033[1m\033[31m: Echec de connexion.\033[0m\n\n");
 		exit(1);
 	}

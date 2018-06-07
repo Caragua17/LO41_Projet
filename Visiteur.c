@@ -13,6 +13,18 @@ void traitantSIGINT(int num){
 	}
 }
 /*=============================================================================
+traitantSIGUSR: executed when a 'SIGUSR1/SIGUSR2' signal is intercepted.
+*/
+void traitantSIGUSR(int num){
+
+	if(num == SIGUSR1){
+
+	}
+	else{
+	
+	}
+}
+/*=============================================================================
 MAIN FUNCTION
 */
 int main(int argc, char* argv[]){
@@ -27,27 +39,28 @@ int main(int argc, char* argv[]){
 		getpid(), path[0], path[1]);
 		
 	signal(SIGINT, traitantSIGINT);
+	signal(SIGUSR1, traitantSIGUSR);
 
 	/*-------------------------------------------------------------------------
 	*	Connexion à la memoire partagée (Dweller List)
 	*------------------------------------------------------------------------*/
-	int shmid;
-	int *ptr;
+	int shmDL;
+	int *dwellerList;
 	int dest;
 		
-	if((shmid = shmget(KEY, 3*DWELLERS*sizeof(int), 0755)) == -1){
+	if((shmDL = shmget(KEY_DL, 3*DWELLERS*sizeof(int), 0755)) == -1){
 		perror("\033[1m\033[31m: Echec de connexion.\033[0m\n\n");
 		exit(1);
 	}
 	else{
-		printf(": Connecté ! (msq ID = %d)\n", shmid);
+		printf(": Connecté ! (msq ID = %d)\n", shmDL);
 	}
-	ptr = (int*)shmat(shmid, NULL, 0);
+	dwellerList = (int*)shmat(shmDL, NULL, 0);
 	
 	for(int i=0; i<100; i++){
-		if(shm_read(ptr,i,1) == path[0]){
-			if (shm_read(ptr,i,2) == path[1]){
-				dest = shm_read(ptr,i,0);
+		if(shm_read(dwellerList,i,1) == path[0]){
+			if (shm_read(dwellerList,i,2) == path[1]){
+				dest = shm_read(dwellerList,i,0);
 			}
 		}
 	}
@@ -56,7 +69,7 @@ int main(int argc, char* argv[]){
 	*------------------------------------------------------------------------*/
 	int msqid;
 	
-	if((msqid = msgget(KEY, IPC_EXCL|0755)) == -1){
+	if((msqid = msgget(KEY_VR, IPC_EXCL|0755)) == -1){
 		perror("\033[1m\033[31m: Echec de connexion.\033[0m\n");
 		exit(1);
 	}
@@ -77,10 +90,35 @@ int main(int argc, char* argv[]){
 	
 	/*
 	COMMUNIQUE AVEC IMMEUBLE POUR CONNAITRE NUM ASCENSEUR
-	COMMUNIQUE AVEC ASCENSEUR
-	*/
 	
-	shmdt(ptr);
+	
+	/*-------------------------------------------------------------------------
+	*	Connexion à la memoire partagée (waiting List)
+	*------------------------------------------------------------------------*/
+	int shmWL;
+	int *waitingList;
+		
+	if((shmWL = shmget(KEY_WL, 300*sizeof(int), 0755)) == -1){
+		perror("\033[1m\033[31m: Echec de connexion.\033[0m\n\n");
+		exit(1);
+	}
+	else{
+		printf(": Connecté ! (msq ID = %d)\n", shmWL);
+	}
+	waitingList = (int*)shmat(shmWL, NULL, 0);
+	
+	int index = 0;
+	while(shm_read(waitingList,index,0) != 0){
+		index++;
+	}
+	shm_write(waitingList, index, 0, getpid());
+	shm_write(waitingList, index, 1, 0);
+	shm_write(waitingList, index, 2, path[0]);
+	
+	
+	
+	shmdt(waitingList);	
+	shmdt(dwellerList);
 	printf("\n");
 
 	return EXIT_SUCCESS;

@@ -13,7 +13,9 @@
 #include <stdarg.h>
 #include <signal.h>
 
-#define KEY 111
+#define KEY_DL 201
+#define KEY_WL 202
+#define KEY_VR 101
 #define DWELLERS 100
 /*
 30 Noir		31 Rouge	32 Vert		33 Jaune
@@ -69,9 +71,10 @@ sends struct 'msg' of type 'msgtype' in the queue n°'qid'
 void msq_send(int qid, int msgtype, msqbuf msg){
 
 	msg.dest = msgtype;
-	if(msgsnd(qid, &msg, sizeof(msg.sender)+sizeof(msg.text), IPC_NOWAIT) == -1){
-		printf("\033[1m\033[31m: Echec de l'envoi.\033[0m\n\n");
-		exit(1);
+	if(msgsnd(qid, &msg, sizeof(msg.sender)+sizeof(msg.text),\
+		IPC_NOWAIT) == -1){
+			printf("\033[1m\033[31m: Echec de l'envoi.\033[0m\n\n");
+			exit(1);
 	}
 }
 /*=============================================================================
@@ -81,9 +84,10 @@ prints struct 'msg' if it's of type 'msgtype' in the queue n°'qid'
 long msq_receive(int qid, int msgtype){
 
 	msqbuf msg;
-	if(msgrcv(qid, &msg, sizeof(msg.sender)+sizeof(msg.text), msgtype, MSG_NOERROR) == -1){
-		printf("\033[1m\033[31m: Echec de la reception.\033[0m\n\n");
-		return -1;
+	if(msgrcv(qid, &msg, sizeof(msg.sender)+sizeof(msg.text), msgtype,\
+		MSG_NOERROR) == -1){
+			printf("\033[1m\033[31m: Echec de la reception.\033[0m\n\n");
+			return -1;
 	}
 	else{
 		printf("\n\033[1m\033[32m: Réception...\033[0m\n");
