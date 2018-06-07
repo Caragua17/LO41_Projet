@@ -1,13 +1,13 @@
 
-#Projet de programmation système
+# Projet de programmation système
 
-##A propos
+## A propos
 
-###Sujet
+### Sujet
 
 Simuler l'environnement d'un immeuble d'habitation et/ou de bureau, à l'aide des outils systèmes tels que les processus, threads, objets IPC, etc...
 
-###Contexte
+### Contexte
 
 * Notre immeuble comporte 3 ascenseurs qui opèrent de concert et couvrent 25 étages.
 
@@ -17,7 +17,7 @@ Simuler l'environnement d'un immeuble d'habitation et/ou de bureau, à l'aide de
 
 * Les résidents peuvent également se déplacer, quitter/entrer dans l'immeuble, cependant ils n'ont pas besoin d'autorisation pour le faire.
 
-##Choix de conception
+## Choix de conception
 
 1. Processus Immeuble
 	* Fork pour créer les 3 ascenseurs
@@ -43,20 +43,20 @@ Simuler l'environnement d'un immeuble d'habitation et/ou de bureau, à l'aide de
 	* Si reception d'un signal *SIGUSR1*, entre dans l'ascenseur
 	* Si reception d'un signal *SIGUSR2*, quitte l'ascenseur
 
-##Avancement
+## Avancement
 
-###Dernièrement...
+### Dernièrement...
 
 * *WaitingList* instanciée par le processus Ascenseur 
 * Ajout des signaux SIGINT pour tous les processus
 
-###A faire...
+### A faire...
 
 * Une fois l'autorisation donnée, le visiteur contacte l'immeuble pour savoir quel ascenseur utiliser
 * Le visiteur doit s'enregistrer dans la *WaitingList* du bon ascenseur
 * L'ascenseur doit parcourir les étages et ramasser les visiteurs au passage
 
-##Liens utiles
+## Liens utiles
 
 A propos des Shared Memories:
 http://icps.u-strasbg.fr/~bastoul/teaching/systeme/docs/TD4_memoire_partagee.pdf
