@@ -37,39 +37,40 @@ MAIN FUNCTION
 */
 int main(int argc, char* argv[]){
 
-	//clearScreen();
-	
 	int current = 0;
 	int goingUp = 1;
+	int id;
+
+	clearScreen();
 
 	if(argc == 2){
-		int id = atoi(argv[1]);
-		printf("\n: Ascenseur %i en fonctionnement !", id);
+		id = atoi(argv[1]);
+		printf("\n: Ascenseur %i en fonctionnement !\n\n", id);
 	}
 	else{
 		printf("\033[1m\033[31m\n: Ascenseur en panne !\033[0m\n\n");
+		exit(0);
 	}
 	signal(SIGINT, traitantSIGINT);
 	signal(SIGUSR1, traitantSIGUSR);
-	/*
+
 	printf("\33[1A\033[1m: étage actuel ( \033[33m%i\033[37m )\n", current);
-	*/
-	
+
 	/*-------------------------------------------------------------------------
 	*	Création Mémoire partagée pour Liste d'attente 
 	*------------------------------------------------------------------------*/
-	if((shmWL = shmget(KEY_WL, 300*sizeof(int),\
+	if((shmWL = shmget(KEY_WL+id, 300*sizeof(int),\
 		IPC_CREAT|IPC_EXCL|0755)) == -1){
 			perror("\033[1m\033[31m: Echec.\033[0m\n\n");
 			exit(1);
 	}
 	else{
-		printf(": shm ID = %d\n", shmWL);
+		printf("\n: shm ID = %d\n", shmWL);
 		waitingList = (int*)shmat(shmWL, NULL, 0);
 		shm_init(waitingList, 300);
 	}
 	
-	kill(getpid(), SIGINT);
+	while(1);
 	
 	printf("\n");
 	

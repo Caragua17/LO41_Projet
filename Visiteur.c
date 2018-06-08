@@ -20,7 +20,7 @@ void traitantSIGUSR(int num){
 	if(num == SIGUSR1){
 
 	}
-	else{
+	else{/*SIGUSR2*/
 	
 	}
 }
@@ -113,9 +113,9 @@ int main(int argc, char* argv[]){
 	}
 	shm_write(waitingList, index, 0, getpid());
 	shm_write(waitingList, index, 1, 0);
-	shm_write(waitingList, index, 2, path[0]);
+	shm_write(waitingList, index, 2, path[0]);	
 	
-	
+	printf("\n: Je suis à l'étage 0.\n");
 	
 	shmdt(waitingList);	
 	shmdt(dwellerList);

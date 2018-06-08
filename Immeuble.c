@@ -15,6 +15,11 @@ Will delete IPC objects in order to exit well the program.
 void traitantSIGINT(int num){
 
 	if(num == SIGINT){
+		for(int i=0; i<100; i++){
+			if(shm_read(dwellerList,i,0) != 0){
+				kill(shm_read(dwellerList,i,0), SIGINT);
+			}
+		}
 		shmdt(dwellerList);
 		shmctl(shmDL, IPC_RMID, NULL);
 		msgctl(msqid, IPC_RMID, NULL);
@@ -28,6 +33,10 @@ Send by a dweller just after his registration, to print the updated list.
 */
 void traitantSIGUSR(int num){
 
+	clearScreen();
+	printf(": shm ID = %d\n", shmDL);
+	printf(": msq ID = %d\n", msqid);
+	
 	if(num == SIGUSR1){
 		printf("\n: Mise à jour de la Liste des résidents\n");
 		for(int i=0; i<100; i++){
@@ -44,29 +53,9 @@ MAIN FUNCTION
 */
 int main(int argc, char* argv[]){
 
-	/*-------------------------------------------------------------------------
-	*	Création des 3 Ascenseurs (avec recouvrement) + signals
-	*------------------------------------------------------------------------*/
 	clearScreen();
-	printf("\n");
-	
-	pid_t pid = 1;
-	int elevators = 3;
-	int status;
-	char *param = malloc(sizeof(char));
-	
 	signal(SIGINT, traitantSIGINT);
 	signal(SIGUSR1, traitantSIGUSR);	
-	
-	while(pid > 0 && elevators > 0){
-		pid = fork();	
-		if(pid == 0){ // dans le FILS
-			sprintf(param, "%i", elevators);
-			execl("./Ascenseur", "Ascenseur", param, NULL);
-		}
-		elevators--;
-	} // dans le PERE, on attend la fin des ascenseurs...
-	wait(&status); wait(&status); wait(&status);
 	
 	/*-------------------------------------------------------------------------
 	*	Création Mémoire partagée pour Table des résidents 
