@@ -17,6 +17,8 @@ Simuler l'environnement d'un immeuble d'habitation et/ou de bureau, à l'aide de
 
 * Les résidents peuvent également se déplacer, quitter/entrer dans l'immeuble, cependant ils n'ont pas besoin d'autorisation pour le faire.
 
+![Illustration][https://github.com/Caragua17/LO41_Projet/blob/master/LO41%20Illustration.png]
+
 ## Choix de conception
 
 1. Processus Immeuble
