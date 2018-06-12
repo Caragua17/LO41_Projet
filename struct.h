@@ -16,7 +16,9 @@
 #define KEY_DL 201
 #define KEY_WL 202
 #define KEY_VR 101
-#define DWELLERS 100
+#define KEY_EL 203
+#define BUILDING_DWELLERS 100
+#define ELEVATOR_CAPACITY 10
 /*
 30 Noir		31 Rouge	32 Vert		33 Jaune
 34 Bleu		35 Magenta	36 Cyan		37 Blanc

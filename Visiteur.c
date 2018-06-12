@@ -48,7 +48,7 @@ int main(int argc, char* argv[]){
 	int *dwellerList;
 	int dest;
 		
-	if((shmDL = shmget(KEY_DL, 3*DWELLERS*sizeof(int), 0755)) == -1){
+	if((shmDL = shmget(KEY_DL, 3*BUILDING_DWELLERS*sizeof(int), 0755)) == -1){
 		perror("\033[1m\033[31m: Echec de connexion.\033[0m\n\n");
 		exit(1);
 	}
@@ -98,7 +98,7 @@ int main(int argc, char* argv[]){
 	int shmWL;
 	int *waitingList;
 		
-	if((shmWL = shmget(KEY_WL, 300*sizeof(int), 0755)) == -1){
+	if((shmWL = shmget(KEY_WL+1, 300*sizeof(int), 0755)) == -1){
 		perror("\033[1m\033[31m: Echec de connexion.\033[0m\n\n");
 		exit(1);
 	}
