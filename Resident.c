@@ -30,6 +30,7 @@ MAIN FUNCTION
 */
 int main(int argc, char* argv[]){
 
+	clearScreen();
 	/*-------------------------------------------------------------------------
 	*	Verification des arguments + initialisation signals
 	*------------------------------------------------------------------------*/
@@ -41,24 +42,24 @@ int main(int argc, char* argv[]){
 	
 	int path[2] = {atoi(argv[1]), atoi(argv[2])};
 	
-	printf("\n: Résident %d, etage %d, porte %d.\n",\
+	printf("\n: Résident %d\n: Je vis au %de étage, porte %d.\n",\
 		getpid(), path[0], path[1]);
 	
 	/*-------------------------------------------------------------------------
 	*	Connexion et édition de la memoire partagée (Dweller List)
 	*------------------------------------------------------------------------*/
-	int shmid;
+	int shmDL;
 	
-	if((shmid = shmget(KEY_DL, 3*BUILDING_DWELLERS*sizeof(int), 0755)) == -1){
-		printf("\033[1m\033[31m: Echec de connexion.\033[0m\n\n");
+	if((shmDL = shmget(KEY_DL, 3*BUILDING_DWELLERS*sizeof(int), 0755)) == -1){
+		printf("\033[1m\033[31m: Echec de connexion (shmDL).\033[0m\n\n");
 		exit(1);
 	}
 	else{
-		printf(": Connecté ! (msq ID = %d)\n", shmid);
+		printf(": Connecté à shmDL !\n");
 	}
-	ptr = (int*)shmat(shmid, NULL, 0);
+	ptr = (int*)shmat(shmDL, NULL, 0);
 	
-	printf(": Identification (Immeuble %d)\n", shm_read(ptr,0,0));
+	printf(": Enregistrement (Immeuble %d)\n", shm_read(ptr,0,0));
 	
 	int index = 0;
 	
@@ -78,13 +79,13 @@ int main(int argc, char* argv[]){
 	int msqid;
 		
 	if((msqid = msgget(KEY_VR, IPC_EXCL|0755)) == -1){
-		printf("\033[1m\033[31m: Echec de connexion.\033[0m\n\n");
+		printf("\033[1m\033[31m\n: Echec de connexion (msqVR).\033[0m\n\n");
 		exit(1);
 	}
 
 	while(1){
 		long dest = msq_receive(msqid, getpid());
-		printf("\n: Permettre l'accès ? (o/n) : ");
+		printf("\n: Permettre l'accès de %li ? (o/n) : ", dest);
 		char c = 'a';
 		while(c != 'o' && c != 'n'){
 			c = getchar();

@@ -29,19 +29,19 @@ traitantSIGUSR: executed when a 'SIGUSR1/SIGUSR2' signal is intercepted.
 */
 void traitantSIGUSR(int num){
 
-	if(num == SIGUSR1){
+	if(num == SIGUSR1){ // A guest has requested the elevator
 		int index = 0;
 		printf("\n: Waiting list\n");
-		for(int i=0; i<count; i++){
+		for(int i=1; i<100; i++){
 			if(shm_read(waitingList,i,0) != 0){
 				printf(": [ %d | %d | %d ]\n", shm_read(waitingList,i,0),\
 					shm_read(waitingList,i,1), shm_read(waitingList,i,2));
 			}
 		}
-		printf("\n: Passengers list\n");
+		printf("\n: Passengers list (%d)\n", count);
 		for(int i=0; i<count; i++){
-			printf(": [ %d | %d | %d ]\n", passengers[count][0],\
-				passengers[count][1], passengers[count][2]);
+			printf(": [ %d | %d | %d ]\n", passengers[i][0],\
+				passengers[i][1], passengers[i][2]);
 		}
 	}
 	else{/*SIGUSR2*/}
@@ -83,14 +83,13 @@ int main(int argc, char* argv[]){
 	else{
 		printf(": Connecté à shmEL !\n");
 		elevatorList = (int*)shmat(shmEL, NULL, 0);
-		shm_init(elevatorList, 4*3);
 	}
 	shm_write(elevatorList,id,0,getpid());
 	
 	/*-------------------------------------------------------------------------
 	*	Création Mémoire partagée pour Liste d'attente 
 	*------------------------------------------------------------------------*/
-	if((shmWL = shmget(KEY_WL+id, 300*sizeof(int),\
+	if((shmWL = shmget(KEY_WL+1, 300*sizeof(int),\
 		IPC_CREAT|IPC_EXCL|0755)) == -1){
 			perror("\033[1m\033[31m: Echec de création (shmWL).\033[0m\n\n");
 			exit(1);
@@ -99,21 +98,27 @@ int main(int argc, char* argv[]){
 		printf("\n: Création de shmWL (id=%d).\n", shmWL);
 		waitingList = (int*)shmat(shmWL, NULL, 0);
 		shm_init(waitingList, 300);
+		shm_write(waitingList, 0, 0, getpid());
 	}
 	count = 0;
 	
 	while(working == 1){
-		for(int i=0; i<ELEVATOR_CAPACITY; i++){
-			if (current == shm_read(waitingList, i, 1)){
+		for(int i=1; i<ELEVATOR_CAPACITY; i++){
+			if (current == shm_read(waitingList, i, 1)\
+				&& shm_read(waitingList, i, 0) != 0){
 				passengers[count][0] = shm_read(waitingList, i, 0);
 				passengers[count][1] = shm_read(waitingList, i, 1);
 				passengers[count][2] = shm_read(waitingList, i, 2);
+				shm_write(waitingList, i, 0, 0);
+				shm_write(waitingList, i, 1, 0);
+				shm_write(waitingList, i, 2, 0);				
 				count++;
 			}
 		}
 	}
 	
 	printf("\n");
+	shmctl(shmWL, IPC_RMID, NULL);
 	
 	return EXIT_SUCCESS;
 }

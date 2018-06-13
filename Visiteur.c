@@ -29,13 +29,15 @@ MAIN FUNCTION
 */
 int main(int argc, char* argv[]){
 	
+	clearScreen();
+	
 	if(argc != 3){
 		perror("\033[1m\033[31m: use /Visiteur [floor] [door].\033[0m\n\n");
 		exit(1);
 	}
 	int path[2] = {atoi(argv[1]), atoi(argv[2])};
 	
-	printf("\n: Visiteur %i. Etage %i, porte %i.\n",\
+	printf("\n: Visiteur %i. \n: Veut se rendre au %ie étage, porte %i.\n",\
 		getpid(), path[0], path[1]);
 		
 	signal(SIGINT, traitantSIGINT);
@@ -49,11 +51,11 @@ int main(int argc, char* argv[]){
 	int dest;
 		
 	if((shmDL = shmget(KEY_DL, 3*BUILDING_DWELLERS*sizeof(int), 0755)) == -1){
-		perror("\033[1m\033[31m: Echec de connexion.\033[0m\n\n");
+		perror("\033[1m\033[31m: Echec de connexion (shmDL).\033[0m\n\n");
 		exit(1);
 	}
 	else{
-		printf(": Connecté ! (msq ID = %d)\n", shmDL);
+		printf(": Connecté à shmDL !\n");
 	}
 	dwellerList = (int*)shmat(shmDL, NULL, 0);
 	
@@ -70,7 +72,7 @@ int main(int argc, char* argv[]){
 	int msqid;
 	
 	if((msqid = msgget(KEY_VR, IPC_EXCL|0755)) == -1){
-		perror("\033[1m\033[31m: Echec de connexion.\033[0m\n");
+		perror("\033[1m\033[31m: Echec de connexion (msqVR).\033[0m\n");
 		exit(1);
 	}
 	msqbuf msg;
@@ -99,11 +101,11 @@ int main(int argc, char* argv[]){
 	int *waitingList;
 		
 	if((shmWL = shmget(KEY_WL+1, 300*sizeof(int), 0755)) == -1){
-		perror("\033[1m\033[31m: Echec de connexion.\033[0m\n\n");
+		perror("\033[1m\033[31m: Echec de connexion (shmWL).\033[0m\n\n");
 		exit(1);
 	}
 	else{
-		printf(": Connecté ! (msq ID = %d)\n", shmWL);
+		printf(": Connecté à shmWL de l'ascenseur %i !\n", 1);
 	}
 	waitingList = (int*)shmat(shmWL, NULL, 0);
 	
@@ -113,9 +115,11 @@ int main(int argc, char* argv[]){
 	}
 	shm_write(waitingList, index, 0, getpid());
 	shm_write(waitingList, index, 1, 0);
-	shm_write(waitingList, index, 2, path[0]);	
+	shm_write(waitingList, index, 2, path[0]);
 	
 	printf("\n: Je suis à l'étage 0.\n");
+	
+	kill(shm_read(waitingList,0,0), SIGUSR1); // APPEL ASCENSEUR
 	
 	shmdt(waitingList);	
 	shmdt(dwellerList);

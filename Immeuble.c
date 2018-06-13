@@ -4,7 +4,7 @@
 /*=============================================================================
 GLOBAL VARIABLES USED HERE
 */
-int msqid;
+int msqVR;
 int shmDL;
 int shmEL;
 int *dwellerList;
@@ -24,7 +24,7 @@ void traitantSIGINT(int num){
 		}
 		shmdt(dwellerList);
 		shmctl(shmDL, IPC_RMID, NULL);
-		msgctl(msqid, IPC_RMID, NULL);
+		msgctl(msqVR, IPC_RMID, NULL);
 		shmctl(shmEL, IPC_RMID, NULL);
 		printf("\n: Objets IPC supprimés !\n\n");
 		exit(0);
@@ -37,8 +37,9 @@ Send by a dweller just after his registration, to print the updated list.
 void traitantSIGUSR(int num){
 
 	clearScreen();
-	printf(": shm ID = %d\n", shmDL);
-	printf(": msq ID = %d\n", msqid);
+	printf(": shmEL = %d\n", shmEL);
+	printf(": shmDL = %d\n", shmDL);
+	printf(": msqVR = %d\n", msqVR);
 	
 	if(num == SIGUSR1){
 		printf("\n: Mise à jour de la Liste des résidents\n");
@@ -71,15 +72,11 @@ int main(int argc, char* argv[]){
 			exit(1);
 	}
 	else{
-		printf(": shm ID = %d\n", shmDL);
+		printf(": shmDL = %d\n", shmDL);
 		dwellerList = (int*)shmat(shmDL, NULL, 0);
 		shm_init(dwellerList, 3*BUILDING_DWELLERS);
 	}
 	shm_write(dwellerList,0,0,getpid());
-	
-	printf("\n: Initialisation de la Liste des résidents\n");
-	printf(": [ %d | %d | %d ]\n",shm_read(dwellerList,0,0),\
-		shm_read(dwellerList,0,1), shm_read(dwellerList,0,2));
 		
 	/*-------------------------------------------------------------------------
 	*	Création Mémoire partagée pour les pid ascenseurs
@@ -88,11 +85,11 @@ int main(int argc, char* argv[]){
 	
 	if((shmEL = shmget(KEY_EL, 4*3*sizeof(int),\
 		IPC_CREAT|IPC_EXCL|0755)) == -1){
-			perror("\033[1m\033[31m: Echec.\033[0m\n\n");
+			perror("\033[1m\033[31m: Echec de création (shmEL).\033[0m\n\n");
 			exit(1);
 	}
 	else{
-		printf(": shm ID = %d\n", shmEL);
+		printf(": shmEL = %d\n", shmEL);
 		elevatorList = (int*)shmat(shmEL, NULL, 0);
 		shm_init(elevatorList, 4*3);
 	}
@@ -103,12 +100,12 @@ int main(int argc, char* argv[]){
 	*------------------------------------------------------------------------*/
 	printf("\n: Creation de la file de message...\n");
 	
-	if((msqid = msgget(KEY_VR, IPC_CREAT|IPC_EXCL|0755)) == -1){
-		perror("\033[1m\033[31m: Echec.\033[0m\n\n");
+	if((msqVR = msgget(KEY_VR, IPC_CREAT|IPC_EXCL|0755)) == -1){
+		perror("\033[1m\033[31m: Echec de création (msqVR).\033[0m\n\n");
 		exit(1);
 	}
 	else{
-		printf(": msq ID = %d\n", msqid);
+		printf(": msqVR = %d\n", msqVR);
 	}
 	/*-------------------------------------------------------------------------
 	*	BOUCLE INFINIE

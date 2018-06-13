@@ -13,10 +13,10 @@
 #include <stdarg.h>
 #include <signal.h>
 
-#define KEY_DL 201
-#define KEY_WL 202
-#define KEY_VR 101
-#define KEY_EL 203
+#define KEY_DL 100
+#define KEY_WL 200
+#define KEY_EL 200
+#define KEY_VR 300
 #define BUILDING_DWELLERS 100
 #define ELEVATOR_CAPACITY 10
 /*
