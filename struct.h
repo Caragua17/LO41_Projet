@@ -13,10 +13,10 @@
 #include <stdarg.h>
 #include <signal.h>
 
-#define KEY_DL 100
-#define KEY_WL 200
-#define KEY_EL 200
-#define KEY_VR 300
+#define KEY_DL 100 // DwellerList
+#define KEY_WL 200 // WaitingList
+#define KEY_EL 200 // ElevatorList
+#define KEY_VR 300 // msq Visiteur-Résident
 #define BUILDING_DWELLERS 100
 #define ELEVATOR_CAPACITY 10
 /*

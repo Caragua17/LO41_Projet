@@ -51,10 +51,10 @@ MAIN FUNCTION
 */
 int main(int argc, char* argv[]){
 
-	int current = 0;
-	int goingUp = 1;
+	int current = 0; // current floor
+	int goingUp = 1; // 1:UP 0:DOWN
 	int id;
-	int working = 1;
+	int working = 1; // 0:Intervention du technicien
 
 	clearScreen();
 
@@ -89,7 +89,7 @@ int main(int argc, char* argv[]){
 	/*-------------------------------------------------------------------------
 	*	Création Mémoire partagée pour Liste d'attente 
 	*------------------------------------------------------------------------*/
-	if((shmWL = shmget(KEY_WL+1, 300*sizeof(int),\
+	if((shmWL = shmget(KEY_WL+id, 300*sizeof(int),\
 		IPC_CREAT|IPC_EXCL|0755)) == -1){
 			perror("\033[1m\033[31m: Echec de création (shmWL).\033[0m\n\n");
 			exit(1);
