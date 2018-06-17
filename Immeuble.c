@@ -59,7 +59,7 @@ int main(int argc, char* argv[]){
 
 	clearScreen();
 	signal(SIGINT, traitantSIGINT);
-	signal(SIGUSR1, traitantSIGUSR);	
+	signal(SIGUSR1, traitantSIGUSR);
 	
 	/*-------------------------------------------------------------------------
 	*	Création Mémoire partagée pour Table des résidents 

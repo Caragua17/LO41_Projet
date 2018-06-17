@@ -96,6 +96,7 @@ int main(int argc, char* argv[]){
 			msg.dest = dest;
 			sprintf(msg.text, "%s", "OK");
 			msq_send(msqid, dest, msg);
+			printf("\n\033[1m\033[32m: Autorisation accordée !\033[0m\n");
 		}
 		else{
 			kill(dest, SIGINT);

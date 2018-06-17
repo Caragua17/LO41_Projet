@@ -51,7 +51,7 @@ int main(int argc, char* argv[]){
 	int dest;
 		
 	if((shmDL = shmget(KEY_DL, 3*BUILDING_DWELLERS*sizeof(int), 0755)) == -1){
-		perror("\033[1m\033[31m: Echec de connexion (shmDL).\033[0m\n\n");
+		perror("\033[1m\033[31m\n: Echec de connexion (shmDL).\033[0m\n\n");
 		exit(1);
 	}
 	else{
@@ -72,7 +72,7 @@ int main(int argc, char* argv[]){
 	int msqid;
 	
 	if((msqid = msgget(KEY_VR, IPC_EXCL|0755)) == -1){
-		perror("\033[1m\033[31m: Echec de connexion (msqVR).\033[0m\n");
+		perror("\033[1m\033[31m\n: Echec de connexion (msqVR).\033[0m\n");
 		exit(1);
 	}
 	msqbuf msg;
@@ -100,8 +100,8 @@ int main(int argc, char* argv[]){
 	int shmWL;
 	int *waitingList;
 		
-	if((shmWL = shmget(KEY_WL+1, 300*sizeof(int), 0755)) == -1){
-		perror("\033[1m\033[31m: Echec de connexion (shmWL).\033[0m\n\n");
+	if((shmWL = shmget(KEY_WL+1, 3*ELEVATOR_WAITSIZE*sizeof(int), 0755)) == -1){
+		perror("\033[1m\033[31m\n: Echec de connexion (shmWL).\033[0m\n\n");
 		exit(1);
 	}
 	else{

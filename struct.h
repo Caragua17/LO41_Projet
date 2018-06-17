@@ -19,6 +19,13 @@
 #define KEY_VR 300 // msq Visiteur-Résident
 #define BUILDING_DWELLERS 100
 #define ELEVATOR_CAPACITY 10
+#define ELEVATOR_WAITSIZE 20
+#define TRUE 1
+#define FALSE 0
+#define STANDBY 0
+#define STOP 1
+#define MOVE 2
+
 /*
 30 Noir		31 Rouge	32 Vert		33 Jaune
 34 Bleu		35 Magenta	36 Cyan		37 Blanc
