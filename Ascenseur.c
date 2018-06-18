@@ -51,7 +51,7 @@ void traitantSIGUSR(int num){
 */
 int firstLineAvailable(){
 	
-	int index;
+	int index = 0;
 	
 	while(passengers[index][0] != 0){
 		index++;
@@ -175,11 +175,12 @@ int main(int argc, char* argv[]){
 				}
 			}
 			for(int i=1; i<ELEVATOR_CAPACITY; i++){
-				if(passengers[i][2] == current){
+				if(passengers[i][2] == current && passengers[i][0] != 0){
 					//kill(passengers[i][0], SIGINT);
 					passengers[i][0] = 0;
 					passengers[i][1] = 0;
 					passengers[i][2] = 0;
+					kill(getpid(),SIGUSR1);
 				}
 			}
 			status = MOVE;
