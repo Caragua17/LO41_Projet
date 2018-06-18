@@ -129,11 +129,9 @@ int main(int argc, char* argv[]){
 	}
 	
 	printf("\n: Etage actuel ( \033[33m\033[1m%i\033[0m )", current);
-	
 	status = STOP;
 	
 	while(working == 1){
-		
 		switch(status){
 		
 		case STANDBY: /*Personne n'utilise l'ascenseur*/
@@ -202,7 +200,7 @@ int main(int argc, char* argv[]){
 			}
 			for(int i=0; i<ELEVATOR_CAPACITY; i++){
 				if(passengers[i][2] == current && passengers[i][0] != 0){
-					kill(passengers[i][0], SIGINT);
+					kill(passengers[i][0], SIGUSR1);
 					printf("\033[36m\033[1m");
 					printf(": Le passager %d est descendu.\n\033[0m",\
 						passengers[i][0]);	
@@ -224,9 +222,5 @@ int main(int argc, char* argv[]){
 			break;
 		}
 	}
-	
-	printf("\n");
-	shmctl(shmWL, IPC_RMID, NULL);
-	
 	return EXIT_SUCCESS;
 }

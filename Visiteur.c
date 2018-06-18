@@ -13,12 +13,12 @@ Will kill the processus.
 void traitantSIGINT(int num){
 
 	if(num == SIGINT){
-		if(status != INSIDE){
+		if(status == 1){
 			printf("\033[1m\033[31m\n: Accès refusé.\033[0m\n\n");
 			exit(1);
 		}
 		else{
-			printf("\033[1m\033[32m\n: Arrivé à destination !\033[0m\n\n");
+			printf("\n: Au revoir.\n\n");
 			exit(1);
 		}
 	}
@@ -29,7 +29,8 @@ traitantSIGUSR: executed when a 'SIGUSR1/SIGUSR2' signal is intercepted.
 void traitantSIGUSR(int num){
 
 	if(num == SIGUSR1){
-
+		printf("\033[1m\033[32m: Arrivé à destination !\033[0m\n");
+		status = 3;
 	}
 	else{/*SIGUSR2*/
 	
@@ -41,7 +42,7 @@ MAIN FUNCTION
 int main(int argc, char* argv[]){
 	
 	clearScreen();
-	status = WAITING;
+	status = 1;
 	
 	if(argc != 3){
 		perror("\033[1m\033[31m: use /Visiteur [floor] [door].\033[0m\n\n");
@@ -99,13 +100,28 @@ int main(int argc, char* argv[]){
 		exit(1);
 	}
 	else{
-		printf("\033[1m\033[32m\n: Autorisation accordée !\033[0m\n");
-		status = INSIDE;
+		printf("\033[1m\033[32m: Autorisation accordée !\033[0m\n");
+		status = 2;
 	}
 	
-	/*
-	COMMUNIQUE AVEC IMMEUBLE POUR CONNAITRE NUM ASCENSEUR
+	/*-------------------------------------------------------------------------
+	*	Connexion File de Message (Visiteur-Immeuble) 
+	*------------------------------------------------------------------------*/
+	int msqVI;
 	
+	if((msqVI = msgget(KEY_VI, IPC_EXCL|0755)) == -1){
+		perror("\033[1m\033[31m: Echec de création (msqVI).\033[0m\n\n");
+		exit(1);
+	}
+	else{
+		printf("\n: Connecté à msqVI !\n");
+	}
+	msqbuf req;
+	req.sender = getpid();
+	sprintf(req.text, "%i", path[0]);
+	
+	msq_send(msqVI, shm_read(dwellerList,0,0), req);
+	long id = msq_receive(msqVI, getpid());
 	
 	/*-------------------------------------------------------------------------
 	*	Connexion à la memoire partagée (waiting List)
@@ -113,7 +129,7 @@ int main(int argc, char* argv[]){
 	int shmWL;
 	int *waitingList;
 		
-	if((shmWL = shmget(KEY_WL+1, 3*ELEVATOR_WAITSIZE*sizeof(int),0755)) == -1){
+	if((shmWL = shmget(KEY_WL+id,3*ELEVATOR_WAITSIZE*sizeof(int),0755)) == -1){
 		perror("\033[1m\033[31m\n: Echec de connexion (shmWL).\033[0m\n\n");
 		exit(1);
 	}
@@ -130,15 +146,24 @@ int main(int argc, char* argv[]){
 	shm_write(waitingList, index, 1, 0);
 	shm_write(waitingList, index, 2, path[0]);
 	
-	printf("\n: Je suis à l'étage 0.\n");
-	
+	printf(": Je suis à l'étage 0.\n");
 	kill(shm_read(waitingList,0,0), SIGUSR1); // APPEL ASCENSEUR
 	
-	while(1);
+	while(status != 3);
+	delay(rand()%(10-5)+5);
 	
-	shmdt(waitingList);	
-	shmdt(dwellerList);
-	printf("\n");
+	index = 0;
+	while(shm_read(waitingList,index,0) != 0){
+		index++;
+	}
+	shm_write(waitingList, index, 0, getpid());
+	shm_write(waitingList, index, 1, path[0]);
+	shm_write(waitingList, index, 2, 0);
+
+	printf("\n: Je suis à l'étage %d.\n",path[0]);
+	kill(shm_read(waitingList,0,0), SIGUSR1); // APPEL ASCENSEUR
+	
+	kill(getpid(),SIGINT);
 
 	return EXIT_SUCCESS;
 }

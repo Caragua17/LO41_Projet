@@ -5,6 +5,7 @@
 GLOBAL VARIABLES USED HERE
 */
 int msqVR;
+int msqVI;
 int shmDL;
 int shmEL;
 int *dwellerList;
@@ -25,6 +26,7 @@ void traitantSIGINT(int num){
 		shmdt(dwellerList);
 		shmctl(shmDL, IPC_RMID, NULL);
 		msgctl(msqVR, IPC_RMID, NULL);
+		msgctl(msqVI, IPC_RMID, NULL);
 		shmctl(shmEL, IPC_RMID, NULL);
 		printf("\n: Objets IPC supprimés !\n\n");
 		exit(0);
@@ -98,7 +100,7 @@ int main(int argc, char* argv[]){
 	/*-------------------------------------------------------------------------
 	*	Création de la File de Message (Visiteur-Resident) 
 	*------------------------------------------------------------------------*/
-	printf("\n: Creation de la file de message...\n");
+	printf("\n: Creation de la file de message Visiteur-Resident...\n");
 	
 	if((msqVR = msgget(KEY_VR, IPC_CREAT|IPC_EXCL|0755)) == -1){
 		perror("\033[1m\033[31m: Echec de création (msqVR).\033[0m\n\n");
@@ -108,9 +110,31 @@ int main(int argc, char* argv[]){
 		printf(": msqVR = %d\n", msqVR);
 	}
 	/*-------------------------------------------------------------------------
+	*	Création de la File de Message (Visiteur-Immeuble) 
+	*------------------------------------------------------------------------*/
+	printf("\n: Creation de la file de message Visiteur-Immeuble...\n");
+	
+	if((msqVI = msgget(KEY_VI, IPC_CREAT|IPC_EXCL|0755)) == -1){
+		perror("\033[1m\033[31m: Echec de création (msqVI).\033[0m\n\n");
+		exit(1);
+	}
+	else{
+		printf(": msqVI = %d\n", msqVI);
+	}
+	/*-------------------------------------------------------------------------
 	*	BOUCLE INFINIE
 	*------------------------------------------------------------------------*/
-	while(1);	
-	
+	while(1){
+		long dest;
+		if( (dest = msq_receive(msqVI, getpid())) != -1 ){
+			msqbuf msg;
+			/*
+			ALGORITHME POUR LE CHOIX DE L'ASCENSEUR
+			*/
+			msg.sender = 1;
+			msg.dest = dest;
+			msq_send(msqVI, dest, msg);
+		}
+	}
 	return EXIT_SUCCESS;
 }

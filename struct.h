@@ -18,6 +18,7 @@
 #define KEY_WL 200 // WaitingList
 #define KEY_EL 200 // ElevatorList
 #define KEY_VR 300 // msq Visiteur-Résident
+#define KEY_VI 301 // msq Visiteur-Immeuble
 #define BUILDING_DWELLERS 100
 #define ELEVATOR_CAPACITY 10
 #define ELEVATOR_WAITSIZE 20
@@ -29,7 +30,6 @@
 #define MOVE 2
 #define WAITING 0
 #define INSIDE 1
-
 /*
 30 Noir		31 Rouge	32 Vert		33 Jaune
 34 Bleu		35 Magenta	36 Cyan		37 Blanc
@@ -108,7 +108,6 @@ long msq_receive(int qid, int msgtype){
 	msqbuf msg;
 	if(msgrcv(qid, &msg, sizeof(msg.sender)+sizeof(msg.text), msgtype,\
 		MSG_NOERROR) == -1){
-			printf("\033[1m\033[31m: Echec de la reception.\033[0m\n\n");
 			return -1;
 	}
 	else{
