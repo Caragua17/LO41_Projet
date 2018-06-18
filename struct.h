@@ -12,6 +12,7 @@
 #include <sys/shm.h>
 #include <stdarg.h>
 #include <signal.h>
+#include <time.h>
 
 #define KEY_DL 100 // DwellerList
 #define KEY_WL 200 // WaitingList
@@ -20,11 +21,14 @@
 #define BUILDING_DWELLERS 100
 #define ELEVATOR_CAPACITY 10
 #define ELEVATOR_WAITSIZE 20
+#define ELEVATOR_MOVING_T 3
 #define TRUE 1
 #define FALSE 0
 #define STANDBY 0
 #define STOP 1
 #define MOVE 2
+#define WAITING 0
+#define INSIDE 1
 
 /*
 30 Noir		31 Rouge	32 Vert		33 Jaune
@@ -45,6 +49,15 @@ typedef struct MessageQueueBuffer{
 }
 msqbuf;
 
+/*=============================================================================
+pause: the program will wait a delay before executing the rest of the code.
+*/
+void delay(int i){
+
+    clock_t start,end;
+    start=clock();
+    while(((end=clock())-start)<=i*CLOCKS_PER_SEC);
+}
 /*=============================================================================
 shm_init: will initialize all the shm values, in order to prevent search issues
 */

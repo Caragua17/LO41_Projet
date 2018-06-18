@@ -2,14 +2,25 @@
 #include "struct.h"
 
 /*=============================================================================
+GLOBAL VARIABLES USED HERE
+*/
+int status; //1: want enter 2: auth and move 3: arrived and go out
+
+/*=============================================================================
 traitantSIGINT: executed when a 'Ctrl+C' signal is intercepted.
 Will kill the processus.
 */
 void traitantSIGINT(int num){
 
 	if(num == SIGINT){
-		printf("\033[1m\033[31m\n: Accès refusé.\033[0m\n\n");
-		exit(1);
+		if(status != INSIDE){
+			printf("\033[1m\033[31m\n: Accès refusé.\033[0m\n\n");
+			exit(1);
+		}
+		else{
+			printf("\033[1m\033[32m\n: Arrivé à destination !\033[0m\n\n");
+			exit(1);
+		}
 	}
 }
 /*=============================================================================
@@ -30,6 +41,7 @@ MAIN FUNCTION
 int main(int argc, char* argv[]){
 	
 	clearScreen();
+	status = WAITING;
 	
 	if(argc != 3){
 		perror("\033[1m\033[31m: use /Visiteur [floor] [door].\033[0m\n\n");
@@ -88,6 +100,7 @@ int main(int argc, char* argv[]){
 	}
 	else{
 		printf("\033[1m\033[32m\n: Autorisation accordée !\033[0m\n");
+		status = INSIDE;
 	}
 	
 	/*
@@ -100,12 +113,12 @@ int main(int argc, char* argv[]){
 	int shmWL;
 	int *waitingList;
 		
-	if((shmWL = shmget(KEY_WL+1, 3*ELEVATOR_WAITSIZE*sizeof(int), 0755)) == -1){
+	if((shmWL = shmget(KEY_WL+1, 3*ELEVATOR_WAITSIZE*sizeof(int),0755)) == -1){
 		perror("\033[1m\033[31m\n: Echec de connexion (shmWL).\033[0m\n\n");
 		exit(1);
 	}
 	else{
-		printf(": Connecté à shmWL de l'ascenseur %i !\n", 1);
+		printf("\n: Connecté à shmWL de l'ascenseur %i !\n", 1);
 	}
 	waitingList = (int*)shmat(shmWL, NULL, 0);
 	
@@ -120,6 +133,8 @@ int main(int argc, char* argv[]){
 	printf("\n: Je suis à l'étage 0.\n");
 	
 	kill(shm_read(waitingList,0,0), SIGUSR1); // APPEL ASCENSEUR
+	
+	while(1);
 	
 	shmdt(waitingList);	
 	shmdt(dwellerList);
