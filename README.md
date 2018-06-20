@@ -1,6 +1,8 @@
 
 ### Comment exécuter le code ?
 
+Tout d'abord, compiler le code avec l'instruction "make compil".
+
 Il n'y a malheureusement pas de "Launcher" pour le moment.
 Il faut donc lancer les processus 1 à 1 et si possible dans l'ordre suivant :
 * Immeuble (./Immeuble)
