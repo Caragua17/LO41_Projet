@@ -9,6 +9,7 @@ int *waitingList;
 int *elevatorList;
 int status;
 int passengers[ELEVATOR_CAPACITY][3];
+char semID[7] = {'s','e','m','W','L','x','\0'};
 
 /*=============================================================================
 emptyLists: will check if someone is waiting the elevator or if someone is in.
@@ -61,6 +62,7 @@ void dealingSIGINT(int num)
 	{
 		shmdt(waitingList);
 		shmctl(shmWL, IPC_RMID, NULL);
+		sem_unlink(semID);
 		printf("\n: Objets IPC supprimés !\n\n");
 		exit(0);
 	}
@@ -116,8 +118,6 @@ int main(int argc, char* argv[])
 	*	INITIALIZATION
 	*--------------------------------------------------------------------------	
 
-	id: id of the elevator (1-2-3)
-	
 	current: floor where is the elevator
 	capacity: number of remaining places in the elevator
 	
@@ -167,8 +167,29 @@ int main(int argc, char* argv[])
 	}
 	shm_write(elevatorList,id,0,getpid());
 	shm_write(elevatorList,id,1,current);
-	shm_write(elevatorList,id,2,capacity);	
+	shm_write(elevatorList,id,2,capacity);
 	
+	/*-------------------------------------------------------------------------
+	*	CREATE SEMAPHORE SEMWL
+	*--------------------------------------------------------------------------
+	
+	Initialize semaphores for shared processes. This semaphore will secure the
+	access of the 'waitingList' shared memory.
+	*/	
+	if(id == 1)
+		semID[5] = '1';
+	else if(id == 2)
+		semID[5] = '2';
+	else
+		semID[5] = '3';
+	
+	sem_t *semWL = sem_open(semID, O_CREAT | O_EXCL, 0755, 1);
+	
+	if(semWL == SEM_FAILED)
+	{
+		perror("\033[1m\033[31m: Echec (semWL).\033[0m\n\n");
+		exit(1);
+	}
 	/*-------------------------------------------------------------------------
 	*	CREATE SHARED MEMORY 'WAITING LIST'
 	*--------------------------------------------------------------------------
@@ -303,9 +324,13 @@ int main(int argc, char* argv[])
 							passengers[index][1] = shm_read(waitingList, i, 1);
 							passengers[index][2] = shm_read(waitingList, i, 2);
 
+							sem_wait(semWL); // LOCK ACCESS TO SHM
+
 							shm_write(waitingList, i, 0, 0);
 							shm_write(waitingList, i, 1, 0);
 							shm_write(waitingList, i, 2, 0);
+							
+							sem_post(semWL); // UNLOCK ACCESS TO SHM
 							
 							printf("\033[36m\033[1m");
 							printf(": Le passager %d est monté.\n\033[0m",\

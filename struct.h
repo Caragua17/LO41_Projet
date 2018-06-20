@@ -16,6 +16,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <semaphore.h>
+#include <string.h>
 
 #define KEY_DL 100 // DwellerList
 #define KEY_WL 200 // WaitingList

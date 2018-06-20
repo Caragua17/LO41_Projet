@@ -154,8 +154,31 @@ int main(int argc, char* argv[])
 	
 	msqbuf dir;
 	dir = msq_receive(msqVI, getpid());
-	long id = atoi(dir.text);
+	int id = atoi(dir.text);
 	
+	/*-------------------------------------------------------------------------
+	*	CONNECTION TO THE SEMAPHORE SEMDL
+	*--------------------------------------------------------------------------
+	
+	Initialize semaphores for shared processes. This semaphore will secure the
+	access of the 'dwellerList' shared memory.
+	*/
+	char semID[7] = {'s','e','m','W','L','1','\0'};
+	
+	if(id == 1)
+		semID[5] = '1';
+	else if(id == 2)
+		semID[5] = '2';
+	else
+		semID[5] = '3';
+	
+	sem_t *semWL = sem_open(semID, 0);
+	
+	if(semWL == SEM_FAILED)
+	{
+		perror("\033[1m\033[31m: Echec (semWL).\033[0m\n\n");
+		exit(1);
+	}
 	/*-------------------------------------------------------------------------
 	*	REGISTERING IN 'WAITINGLIST'
 	*--------------------------------------------------------------------------
@@ -178,11 +201,16 @@ int main(int argc, char* argv[])
 	waitingList = (int*)shmat(shmWL, NULL, 0);
 	
 	int index = 0;
+	
+	sem_wait(semWL); // LOCK ACCESS TO SHARED MEMORY
+	
 	while(shm_read(waitingList,index,0) != 0){ index++; }
 	
 	shm_write(waitingList, index, 0, getpid());
 	shm_write(waitingList, index, 1, 0);
 	shm_write(waitingList, index, 2, path[0]);
+	
+	sem_post(semWL); // UNLOCK ACCESS TO SHARED MEMORY
 	
 	printf(": Je suis à l'étage 0.\n");
 	kill(shm_read(waitingList,0,0), SIGUSR1); // ELEVATOR CALLED
@@ -203,11 +231,16 @@ int main(int argc, char* argv[])
 	delay(rand()%(10-5)+5);
 	
 	index = 0;
+	
+	sem_wait(semWL); // LOCK ACCESS TO SHARED MEMORY
+	
 	while(shm_read(waitingList,index,0) != 0){ index++; }
 	
 	shm_write(waitingList, index, 0, getpid());
 	shm_write(waitingList, index, 1, path[0]);
 	shm_write(waitingList, index, 2, 0);
+	
+	sem_post(semWL); // UNLOCK ACCESS TO SHARED MEMORY
 
 	printf("\n: Je suis à l'étage %d.\n",path[0]);
 	kill(shm_read(waitingList,0,0), SIGUSR1); // ELEVATOR CALLED

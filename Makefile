@@ -1,10 +1,11 @@
 
 CXX = gcc
+FLG = -pthread
 
 run: compil
 
 compil:
-	$(CXX) Immeuble.c -o Immeuble
-	$(CXX) Visiteur.c -o Visiteur
-	$(CXX) Ascenseur.c -o Ascenseur
-	$(CXX) Resident.c -o Resident
+	$(CXX) Immeuble.c -o Immeuble $(FLG)
+	$(CXX) Visiteur.c -o Visiteur $(FLG)
+	$(CXX) Ascenseur.c -o Ascenseur $(FLG)
+	$(CXX) Resident.c -o Resident $(FLG) 

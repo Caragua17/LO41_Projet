@@ -51,7 +51,21 @@ int main(int argc, char* argv[])
 	
 	printf("\n: Résident %d\n: Je vis au %de étage, porte %d.\n",\
 		getpid(), path[0], path[1]);
+		
+	/*-------------------------------------------------------------------------
+	*	CONNECTION TO THE SEMAPHORE SEMDL
+	*--------------------------------------------------------------------------
 	
+	Initialize semaphores for shared processes. This semaphore will secure the
+	access of the 'dwellerList' shared memory.
+	*/
+	sem_t *semDL = sem_open("semDL", 0);
+	
+	if(semDL == SEM_FAILED)
+	{
+		perror("\033[1m\033[31m: Echec (semDL).\033[0m\n\n");
+		exit(1);
+	}
 	/*-------------------------------------------------------------------------
 	*	REGISTERING IN 'DWELLERLIST'
 	*--------------------------------------------------------------------------
@@ -76,11 +90,15 @@ int main(int argc, char* argv[])
 	printf(": Enregistrement (Immeuble %d)\n", shm_read(ptr,0,0));
 	int index = 0;
 	
+	sem_wait(semDL); // LOCK ACCESS TO THE SHARED MEMORY
+	
 	while(shm_read(ptr,index,0) != 0){ index++; }
 	
 	shm_write(ptr, index, 0, getpid());
 	shm_write(ptr, index, 1, path[0]);
 	shm_write(ptr, index, 2, path[1]);
+	
+	sem_post(semDL); // UNLOCK ACCESS TO THE SHARED MEMORY
 	
 	printf(": Liste des résidents mise à jour !\n");	
 	kill(shm_read(ptr,0,0), SIGUSR1);

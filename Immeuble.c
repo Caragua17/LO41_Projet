@@ -29,6 +29,7 @@ void dealingSIGINT(int num)
 		msgctl(msqVR, IPC_RMID, NULL);
 		msgctl(msqVI, IPC_RMID, NULL);
 		shmctl(shmEL, IPC_RMID, NULL);
+		sem_unlink("semDL");
 		printf("\n: Objets IPC supprimés !\n\n");
 		exit(0);
 	}
@@ -75,23 +76,20 @@ int main(int argc, char* argv[])
 	signal(SIGUSR1, dealingSIGUSR);
 	
 	/*-------------------------------------------------------------------------
-	*	CREATE SEMAPHORE
+	*	CREATE SEMAPHORE SEMDL
 	*--------------------------------------------------------------------------
 	
+	Initialize semaphores for shared processes. This semaphore will secure the
+	access of the 'dwellerList' shared memory.
+	*/
 	printf("\n: Creation des sémaphores...\n");
+	sem_t *semDL = sem_open("semDL", O_CREAT | O_EXCL, 0755, 1);
 	
-	int semDL;
-	
-	if((semDL = sem_open("semDL", O_CREAT, O_RDWR, 1)) == -1)
+	if(semDL == SEM_FAILED)
 	{
 		perror("\033[1m\033[31m: Echec (semDL).\033[0m\n\n");
 		exit(1);
 	}
-	else
-	{
-		printf(": shmSE = %d\n", semDL);
-	}
-*/
 	/*-------------------------------------------------------------------------
 	*	CREATE SHARED MEMORY 'DWELLERLIST'
 	*--------------------------------------------------------------------------
