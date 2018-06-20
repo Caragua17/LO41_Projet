@@ -3,10 +3,10 @@
 
 Il n'y a malheureusement pas de "Launcher" pour le moment.
 Il faut donc lancer les processus 1 à 1 et si possible dans l'ordre suivant :
-	* Immeuble (./Immeuble)
-	* Ascenseurs (./Ascenseur [id])
-	* Résidents (./Resident [floor] [door])
-	* Visiteurs (./Visiteur [floor] [door])
+* Immeuble (./Immeuble)
+* Ascenseurs (./Ascenseur [id])
+* Résidents (./Resident [floor] [door])
+* Visiteurs (./Visiteur [floor] [door])
 
 ### Comment réagit le programme ?
 
